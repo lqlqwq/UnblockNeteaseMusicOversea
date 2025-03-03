@@ -1,4 +1,4 @@
-# ææƒ
+# ÌáÈ¨
 $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 if (-not $isAdmin) {
     $scriptPath = $MyInvocation.MyCommand.Definition
@@ -8,61 +8,61 @@ if (-not $isAdmin) {
 }
 
 # -------------------------------
-# ä»»åŠ¡éƒ¨åˆ†
+# ÈÎÎñ²¿·Ö
 # -------------------------------
 
-# åˆ›å»ºæ–‡ä»¶
+# ´´½¨ÎÄ¼ş
 @'
 from mitmproxy import http
 
-# éœ€è¦æ‹¦æˆªçš„åŸŸå
+# ĞèÒªÀ¹½ØµÄÓòÃû
 TARGET_DOMAINS = ["p4.music.126.net", "p3.music.126.net","music.163.com"]
 
 def request(flow: http.HTTPFlow):
-    """æ‹¦æˆªè¯·æ±‚"""
+    """À¹½ØÇëÇó"""
     if any(domain in flow.request.url for domain in TARGET_DOMAINS):
-        # print("æ‹¦æˆªåˆ°è¯·æ±‚: {flow.request.url}")
+        # print("À¹½Øµ½ÇëÇó: {flow.request.url}")
 
         flow.request.headers["X-Real-IP"] = "182.138.156.158"
         flow.request.headers["X-Forwarded-For"] = "182.138.156.158"
 
         # print(flow.request.headers["X-Real-IP"])
 
-        # ä¿®æ”¹è¯·æ±‚ï¼Œä¾‹å¦‚ç¯¡æ”¹ User-Agent
+        # ĞŞ¸ÄÇëÇó£¬ÀıÈç´Û¸Ä User-Agent
         # flow.request.headers["User-Agent"] = "Custom-Proxy-User-Agent"
 
-        # ä¹Ÿå¯ä»¥ç›´æ¥è¿”å›è‡ªå®šä¹‰å“åº”
+        # Ò²¿ÉÒÔÖ±½Ó·µ»Ø×Ô¶¨ÒåÏìÓ¦
         # flow.response = http.Response.make(
-        #     200,  # çŠ¶æ€ç 
-        #     b'{"message": "æ‹¦æˆªæˆåŠŸ"}',  # å“åº”ä½“
-        #     {"Content-Type": "application/json"}  # å“åº”å¤´
+        #     200,  # ×´Ì¬Âë
+        #     b'{"message": "À¹½Ø³É¹¦"}',  # ÏìÓ¦Ìå
+        #     {"Content-Type": "application/json"}  # ÏìÓ¦Í·
         # )
 '@ | Set-Content -Path "$PSScriptRoot\intercept_netease.py" -Encoding UTF8
 
-# åˆ é™¤-WindowStyle Hiddenå¯ä»¥è°ƒè¯•(å¦‚æœå‘ç°æ— æ³•æ­£å¸¸è¿è¡Œ)
+# É¾³ı-WindowStyle Hidden¿ÉÒÔµ÷ÊÔ(Èç¹û·¢ÏÖÎŞ·¨Õı³£ÔËĞĞ)
 $action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -Command `
     `"if (Get-Process -Name 'mitmdump' -ErrorAction SilentlyContinue) { `
-        Write-Output 'mitmdump å·²ç»åœ¨è¿è¡Œä¸­.'; `
+        Write-Output 'mitmdump ÒÑ¾­ÔÚÔËĞĞÖĞ.'; `
     } else { `
         Start-Process mitmdump -ArgumentList '-s $PSScriptRoot\intercept_netease.py' -NoNewWindow; `
-        Write-Output 'è¿è¡ŒæˆåŠŸ.'; `
+        Write-Output 'ÔËĞĞ³É¹¦.'; `
     } `
-    Write-Output 'çª—å£å°†åœ¨ä¸‰ç§’åå…³é—­.'; `
+    Write-Output '´°¿Ú½«ÔÚÈıÃëºó¹Ø±Õ.'; `
     Start-Sleep -Seconds 3; exit;`""
 
-# å»¶è¿Ÿ 10 ç§’åå¯åŠ¨
+# ÑÓ³Ù 10 ÃëºóÆô¶¯
 $trigger = New-ScheduledTaskTrigger -AtStartup
 $trigger.Delay = "PT10S"   
 
-# å¼ºåˆ¶æ‰€æœ‰é”™è¯¯å˜æˆç»ˆæ­¢æ€§é”™è¯¯
+# Ç¿ÖÆËùÓĞ´íÎó±ä³ÉÖÕÖ¹ĞÔ´íÎó
 $ErrorActionPreference = "Stop"  
 
 try {
     Register-ScheduledTask -Action $action -Trigger $trigger -TaskName "NeteaseMusic" -Description "NeteaseMusicUnblock" -RunLevel Highest
     
-    Write-Host "è®¡åˆ’ä»»åŠ¡åˆ›å»ºæˆåŠŸï¼çª—å£å°†åœ¨3såå…³é—­"
+    Write-Host "¼Æ»®ÈÎÎñ´´½¨³É¹¦£¡´°¿Ú½«ÔÚ3sºó¹Ø±Õ"
     Start-Sleep -Seconds 3
 } catch {
-    Write-Host "ä»»åŠ¡åˆ›å»ºå¤±è´¥ï¼š" $_.Exception.Message
+    Write-Host "ÈÎÎñ´´½¨Ê§°Ü£º" $_.Exception.Message
     Start-Sleep -Seconds 3
 }
